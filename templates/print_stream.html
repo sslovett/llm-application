@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ChatGPT-like Interface</title>
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-history" id="chatHistory">
+            <!-- Chat messages will be dynamically added here -->
+        </div>
+        <div class="user-input">
+            <input type="text" id="userInput" placeholder="请输入您的问题...">
+            <button id="sendButton">发送</button>
+        </div>
+    </div>
+
+    <script>
+        // Your existing chat interface code here...
+
+        // Server communication code
+        var eventSource; // Declare the eventSource variable outside the click handler
+
+        document.getElementById("sendButton").addEventListener("click", function () {
+            var userMessage = document.getElementById("userInput").value.trim();
+            if (userMessage === '') {
+                alert('Please enter a message!');
+                return;
+            }
+
+            appendMessage('user', userMessage); // Add the user's message to the chat history
+
+            // Close the previous SSE connection (if exists)
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            // Establish SSE connection with the user's message as a parameter
+            eventSource = new EventSource(`/print_stream?question=${encodeURIComponent(userMessage)}`);
+
+            eventSource.onmessage = function (event) {
+                var botMessage = event.data;
+                console.error("=========", botMessage);
+                appendMessage('bot', botMessage);
+            };
+
+            eventSource.onerror = function (error) {
+                console.error("Error occurred with SSE connection:", error);
+                // Handle the error if necessary
+                isFirstToken = true;
+                eventSource.close();
+            };
+            document.getElementById("userInput").value = '';
+        });
+
+        var chatHistoryDiv = document.getElementById("chatHistory"); // 获取 chatHistory 的元素
+        var isFirstToken = true; // 用于跟踪是否是第一次返回 token
+
+        function appendMessage(sender, message) {
+            if (isFirstToken) {
+                // 如果是第一次返回 token，创建新的 <div> 元素，并将 isFirstToken 设置为 false
+                var messageDiv = document.createElement('div');
+                messageDiv.className = `chat-message ${sender === 'user' ? 'user-message' : 'bot-message'}`;
+                chatHistoryDiv.appendChild(messageDiv);
+                if(sender === 'bot') {
+                    isFirstToken = false;
+                }
+            } else {
+                // 如果不是第一次返回 token，直接获取最后一个 <div> 元素，将新的消息内容追加到现有的元素中
+                var messageDiv = chatHistoryDiv.lastElementChild;
+            }
+
+            messageDiv.innerText += message; // 将新的消息内容追加到 <div> 中
+
+            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight; // 将滚动条滚动到最底部
+        }
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>知识库</title>
+    <link rel="stylesheet" href="static/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="row clearfix" style="padding-top: 10px">
+        <div class="col-md-12 column">
+            <h3>知识库文件上传</h3>
+            <form id="myForm">
+
+                <div class="form-group">
+                    <label for="name">知识库名称</label>
+                    <select class="form-control" id="name" name="name">
+                        <option>IT</option>
+                        <option>BST</option>
+                        <option>TEST</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="file">知识库文件</label>
+                    <input type="file" class="form-control-file" id="file" name="file">
+                </div>
+                <button type="submit" class="btn btn-primary">上传</button>
+            </form>
+
+        </div>
+    </div>
+    <div class="row clearfix" style="padding-top: 50px;">
+        <div class="col-md-12 column">
+            <h3>知识库文件训练</h3>
+            <form id="myForm2">
+                <div class="form-group">
+                    <label for="name">知识库名称</label>
+                    <select class="form-control" id="name" name="name">
+                        <option>IT</option>
+                        <option>BST</option>
+                        <option>TEST</option>
+                    </select>
+                </div>
+                {#        <div class="form-group">#}
+                {#            <label for="file">知识库文件</label>#}
+                {#            <input type="file" class="form-control-file" id="file" name="file">#}
+                {#        </div>#}
+                <button type="submit" class="btn btn-primary">训练</button>
+            </form>
+        </div>
+    </div>
+    <div class="row clearfix" style="padding-top: 50px">
+        <div class="col-md-12 column">
+            <h3>问问知识库</h3>
+            <form id="myForm3">
+                <div class="form-group">
+                    <label for="name">知识库名称</label>
+                    <select class="form-control" id="name" name="name">
+                        <option>IT</option>
+                        <option>BST</option>
+                        <option>TEST</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="text">你的问题</label>
+                    <textarea class="form-control" id="text" name="text"  required></textarea>
+                </div>
+                <button type="submit" id="tqq" class="btn btn-primary">问一问</button>
+            </form>
+        </div>
+        <div class="col-md-12 column" style="padding-top: 10px">
+            <div class="form-group">
+                <div class="form-group">
+                    <textarea id="llla" class="form-control" name="回答内容" rows="10"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="static/bootstrap.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $('#myForm').submit(function (e) {
+                    e.preventDefault(); // 阻止表单默认提交行为
+
+                    {#var form = $(this);#}
+                    {#var url = form.attr('action');#}
+                    var url = '/upload';
+                    var formData = new FormData(this);
+
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            // 处理成功的回调逻辑
+                            console.log(response);
+                            alert(response.message);
+                        },
+                        error: function (xhr, status, error) {
+                            // 处理错误的回调逻辑
+                            console.log(xhr.responseText);
+                            alert('上传失败，请重试！');
+                        }
+                    });
+                });
+
+                $('#myForm2').submit(function (e) {
+                    e.preventDefault(); // 阻止表单默认提交行为
+
+                    {#var form = $(this);#}
+                    {#var url = form.attr('action');#}
+                    var url = '/llm/training';
+                    var formData = new FormData(this);
+
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            // 处理成功的回调逻辑
+                            console.log(response);
+                            alert(response.message);
+                        },
+                        error: function (xhr, status, error) {
+                            // 处理错误的回调逻辑
+                            console.log(xhr.responseText);
+                            alert('训练失败，请重试！');
+                        }
+                    });
+                });
+
+                $('#myForm3').submit(function (e) {
+                    e.preventDefault(); // 阻止表单默认提交行为
+
+                    {#var form = $(this);#}
+                    {#var url = form.attr('action');#}
+                    var url = '/llm/ansQ';
+                    var formData = new FormData(this);
+                    var llla = document.getElementById('llla');
+                    llla.value = "";
+                    document.getElementById("tqq").setAttribute("disabled", true);
+                    document.getElementById("tqq").style.backgroundColor = "gray";
+                    //#007bff
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            // 处理成功的回调逻辑
+                            console.log(response);
+
+                            llla.value = response.message;
+                            // alert(response.message);
+                            document.getElementById("tqq").removeAttribute("disabled");
+                            document.getElementById("tqq").style.backgroundColor = "#007bff";
+                        },
+                        error: function (xhr, status, error) {
+                            document.getElementById("tqq").removeAttribute("disabled");
+                            document.getElementById("tqq").style.backgroundColor = "#007bff";
+                            // 处理错误的回调逻辑
+                            console.log(xhr.responseText);
+                            alert('询问失败，请重试！');
+                        }
+                    });
+                });
+
+            });
+        </script>
+
+</body>
+</html>
